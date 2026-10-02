@@ -3,549 +3,179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trim Press Tonnage Calculator — Metal Press MTP Series</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Trim Press Tonnage Calculator — Die Casting, Forging &amp; Sheet Metal</title>
+<meta name="description" content="Calculate trim and blanking force for die castings, forgings and sheet metal. Includes 21 alloys, US and metric units, multi-cavity dies, stripping allowance and press class recommendation. Built by zov911.">
+<meta name="author" content="zov911">
+<meta property="og:title" content="Trim Press Tonnage Calculator">
+<meta property="og:description" content="Trim force for die castings, forgings and sheet metal, with press class recommendations. US & metric.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0c0c0c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='7' fill='%23F5C100'/%3E%3Crect x='6' y='6' width='28' height='6' rx='2' fill='%23000'/%3E%3Crect x='12' y='14' width='16' height='5' rx='1.5' fill='%23000'/%3E%3Crect x='6' y='24' width='28' height='10' rx='2' fill='%23000'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════════
-   TOKENS & RESET
-═══════════════════════════════════════════════ */
 :root {
-  --yellow:      #F5C100;
-  --yellow-dim:  rgba(245,193,0,0.12);
-  --yellow-glow: rgba(245,193,0,0.3);
-  --bg:          #0c0c0c;
-  --bg2:         #141414;
-  --bg3:         #1c1c1c;
-  --border:      #2a2a2a;
-  --border2:     #353535;
-  --text:        #f0f0f0;
-  --muted:       #888;
-  --dim:         #555;
-  --green:       #4ade80;
-  --green-dim:   rgba(74,222,128,0.1);
-  --red:         #f87171;
-  --red-dim:     rgba(248,113,113,0.1);
-  --blue:        #60a5fa;
-  --r:           8px;
-  --r2:          12px;
+  --yellow:#F5C100; --yellow-dim:rgba(245,193,0,0.12); --yellow-glow:rgba(245,193,0,0.3);
+  --bg:#0c0c0c; --bg2:#141414; --bg3:#1c1c1c; --border:#2a2a2a; --border2:#3a3a3a;
+  --text:#f0f0f0; --muted:#9a9a9a; --dim:#6f6f6f;
+  --green:#4ade80; --green-dim:rgba(74,222,128,0.1);
+  --red:#f87171; --red-dim:rgba(248,113,113,0.1);
+  --orange:#fb923c; --blue:#60a5fa;
+  --r:8px; --r2:12px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'DM Sans',sans-serif;
-  font-size:15px;
-  min-height:100vh;
-  overflow-x:hidden;
-}
-
-/* ═══════════════════════════════════════════════
-   NOISE OVERLAY
-═══════════════════════════════════════════════ */
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;min-height:100vh;overflow-x:hidden;}
+button,input,select{font:inherit;color:inherit;}
+:focus-visible{outline:2px solid var(--yellow);outline-offset:2px;}
 body::before{
-  content:'';
-  position:fixed;inset:0;
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.6;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:0;opacity:0.6;
 }
+.wrapper{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:24px 16px 40px;}
 
-/* ═══════════════════════════════════════════════
-   LAYOUT WRAPPER
-═══════════════════════════════════════════════ */
-.wrapper{
-  position:relative;z-index:1;
-  max-width:1080px;margin:0 auto;
-  padding:24px 16px 60px;
-}
-
-/* ═══════════════════════════════════════════════
-   HEADER
-═══════════════════════════════════════════════ */
-.site-header{
-  display:flex;align-items:flex-start;
-  justify-content:space-between;flex-wrap:wrap;gap:16px;
-  margin-bottom:40px;
-  padding-bottom:24px;
-  border-bottom:1px solid var(--border);
-}
+/* Header */
+.site-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid var(--border);}
 .brand{display:flex;align-items:center;gap:14px;}
-.brand-logo{
-  width:52px;height:52px;
-  background:var(--yellow);
-  border-radius:6px;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-}
+.brand-logo{width:52px;height:52px;background:var(--yellow);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .brand-logo svg{width:32px;height:32px;}
-.brand-text .name{
-  font-family:'Oswald',sans-serif;
-  font-size:22px;font-weight:600;
-  letter-spacing:1px;text-transform:uppercase;
-  color:var(--text);line-height:1;
-}
-.brand-text .sub{
-  font-size:12px;color:var(--muted);
-  margin-top:3px;letter-spacing:0.3px;
-}
-.unit-toggle{
-  display:flex;background:var(--bg3);
-  border:1px solid var(--border);border-radius:var(--r);
-  overflow:hidden;align-self:flex-start;margin-top:4px;
-}
-.unit-toggle button{
-  padding:8px 18px;border:none;background:transparent;
-  color:var(--muted);font-family:'DM Sans',sans-serif;
-  font-size:13px;font-weight:600;cursor:pointer;
-  transition:all 0.18s;letter-spacing:0.5px;
-}
-.unit-toggle button.active{background:var(--yellow);color:#000;}
+.brand-text h1{font-family:'Oswald',sans-serif;font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;line-height:1.05;}
+.brand-text .sub{font-size:13px;color:var(--muted);margin-top:3px;}
+.unit-toggle{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.unit-toggle button{padding:8px 16px;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.18s;}
+.unit-toggle button[aria-pressed="true"]{background:var(--yellow);color:#000;}
 
-/* ═══════════════════════════════════════════════
-   PROGRESS STEPS
-═══════════════════════════════════════════════ */
-.steps-bar{
-  display:flex;align-items:center;
-  gap:0;margin-bottom:32px;
-}
-.step-item{
-  display:flex;align-items:center;gap:10px;
-  flex:1;position:relative;
-}
-.step-item:not(:last-child)::after{
-  content:'';
-  position:absolute;top:16px;
-  left:calc(32px + 10px);
-  right:10px;height:1px;
-  background:var(--border2);
-  transition:background 0.4s;
-}
-.step-item.done:not(:last-child)::after{background:var(--yellow);}
-.step-num{
-  width:32px;height:32px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;
-  background:var(--bg3);border:1.5px solid var(--border2);
-  color:var(--muted);transition:all 0.3s;flex-shrink:0;
-}
-.step-item.active .step-num{
-  background:var(--yellow);color:#000;
-  border-color:var(--yellow);
-  box-shadow:0 0 16px var(--yellow-glow);
-}
-.step-item.done .step-num{
-  background:var(--yellow-dim);
-  border-color:var(--yellow);color:var(--yellow);
-}
-.step-label{
-  font-size:12px;font-weight:500;color:var(--muted);
-  white-space:nowrap;transition:color 0.3s;
-}
-.step-item.active .step-label,.step-item.done .step-label{color:var(--text);}
-@media(max-width:500px){.step-label{display:none;}}
+.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:start;}
+@media(max-width:920px){.layout{grid-template-columns:1fr;}}
+.results-col{position:sticky;top:16px;}
+@media(max-width:920px){.results-col{position:static;}}
 
-/* ═══════════════════════════════════════════════
-   CARD BASE
-═══════════════════════════════════════════════ */
-.card{
-  background:var(--bg2);
-  border:1px solid var(--border);
-  border-radius:var(--r2);
-  padding:28px;
-  margin-bottom:16px;
-  transition:border-color 0.3s;
-}
-.card.active-card{border-color:var(--border2);}
-.card-heading{
-  font-family:'Oswald',sans-serif;
-  font-size:13px;font-weight:500;
-  letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--yellow);margin-bottom:20px;
-  display:flex;align-items:center;gap:8px;
-}
-.card-heading::before{
-  content:'';
-  display:inline-block;width:3px;height:14px;
-  background:var(--yellow);border-radius:2px;
-}
+/* Cards */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:22px;margin-bottom:16px;}
+.card-heading{font-family:'Oswald',sans-serif;font-size:14px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--yellow);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.step-n{width:24px;height:24px;border-radius:50%;background:var(--yellow);color:#000;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.card-heading .aside{margin-left:auto;font-family:'DM Sans',sans-serif;letter-spacing:0;text-transform:none;font-size:12px;color:var(--dim);font-weight:500;}
 
-/* ═══════════════════════════════════════════════
-   STEP 1 — MATERIAL
-═══════════════════════════════════════════════ */
-.material-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(155px,1fr));
-  gap:10px;
-}
-.mat-btn{
-  background:var(--bg3);
-  border:1.5px solid var(--border);
-  border-radius:var(--r);
-  padding:14px 12px 12px;
-  cursor:pointer;text-align:left;
-  transition:all 0.18s;
-  display:flex;flex-direction:column;gap:4px;
-}
+/* Category tabs */
+.cat-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.cat-tabs button{background:var(--bg3);border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s;}
+.cat-tabs button[aria-pressed="true"]{border-color:var(--yellow);color:var(--yellow);background:var(--yellow-dim);}
+
+.material-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;}
+.mat-btn{background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 12px;cursor:pointer;text-align:left;transition:all 0.18s;display:flex;flex-direction:column;gap:2px;}
 .mat-btn:hover{border-color:var(--border2);background:#212121;}
-.mat-btn.active{
-  border-color:var(--yellow);
-  background:var(--yellow-dim);
-  box-shadow:0 0 14px var(--yellow-glow);
-}
-.mat-icon{font-size:22px;line-height:1;margin-bottom:4px;}
-.mat-name{
-  font-family:'Oswald',sans-serif;font-size:14px;
-  font-weight:500;color:var(--text);letter-spacing:0.3px;
-}
-.mat-const{font-size:11px;color:var(--muted);}
-.mat-btn.active .mat-const{color:var(--yellow);}
+.mat-btn[aria-pressed="true"]{border-color:var(--yellow);background:var(--yellow-dim);box-shadow:0 0 14px var(--yellow-glow);}
+.mat-name{font-family:'Oswald',sans-serif;font-size:14px;font-weight:500;letter-spacing:.3px;display:flex;align-items:center;gap:6px;}
+.mat-swatch{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.mat-grade{font-size:12px;color:var(--muted);}
+.mat-shear{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;}
+.mat-btn[aria-pressed="true"] .mat-shear{color:var(--yellow);}
+@media(max-width:480px){.material-grid{grid-template-columns:1fr 1fr;}.card{padding:16px;}.mat-btn{padding:10px;}.brand-text h1{font-size:20px;}}
+.custom-mat{display:none;margin-top:12px;}
+.custom-mat.show{display:block;}
 
-/* ═══════════════════════════════════════════════
-   STEP 2 — DIMENSIONS
-═══════════════════════════════════════════════ */
-.dim-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
-@media(max-width:560px){.dim-layout{grid-template-columns:1fr;}}
-
-.shape-row{
-  grid-column:1/-1;
-  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;
-}
-.shape-btn{
-  display:flex;align-items:center;gap:7px;
-  background:var(--bg3);
-  border:1.5px solid var(--border);
-  border-radius:var(--r);
-  padding:8px 14px;cursor:pointer;
-  font-family:'DM Sans',sans-serif;font-size:13px;
-  font-weight:500;color:var(--muted);
-  transition:all 0.18s;
-}
+/* Inputs */
+.shape-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.shape-btn{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--r);padding:7px 12px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all 0.18s;}
 .shape-btn:hover{border-color:var(--border2);color:var(--text);}
-.shape-btn.active{
-  border-color:var(--yellow);color:var(--yellow);
-  background:var(--yellow-dim);
-}
+.shape-btn[aria-pressed="true"]{border-color:var(--yellow);color:var(--yellow);background:var(--yellow-dim);}
 .shape-btn svg{width:16px;height:16px;}
-
+.dim-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:560px){.dim-layout{grid-template-columns:1fr;}}
+.span2{grid-column:1/-1;}
 .input-group{display:flex;flex-direction:column;gap:6px;}
-.input-group label{
-  font-size:12px;font-weight:600;
-  color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;
-}
-.input-row{display:flex;align-items:stretch;gap:0;}
-.num-input{
-  flex:1;background:var(--bg3);
-  border:1.5px solid var(--border);
-  border-right:none;
-  border-radius:var(--r) 0 0 var(--r);
-  padding:11px 14px;
-  color:var(--text);
-  font-family:'Oswald',sans-serif;font-size:20px;font-weight:400;
-  outline:none;transition:border-color 0.18s;
-  -moz-appearance:textfield;
-}
-.num-input::-webkit-inner-spin-button{display:none;}
+.input-group label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;}
+.input-row{display:flex;align-items:stretch;}
+.num-input{flex:1;min-width:0;background:var(--bg3);border:1.5px solid var(--border);border-right:none;border-radius:var(--r) 0 0 var(--r);padding:10px 12px;font-family:'Oswald',sans-serif;font-size:19px;outline:none;transition:border-color 0.18s;-moz-appearance:textfield;}
+.num-input::-webkit-inner-spin-button,.num-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 .num-input:focus{border-color:var(--yellow);}
-.num-unit{
-  background:var(--bg3);
-  border:1.5px solid var(--border);
-  border-radius:0 var(--r) var(--r) 0;
-  padding:11px 14px;
-  color:var(--muted);font-size:13px;font-weight:600;
-  display:flex;align-items:center;white-space:nowrap;
-}
-.input-hint{font-size:11px;color:var(--dim);}
+.num-unit{background:var(--bg3);border:1.5px solid var(--border);border-radius:0 var(--r) var(--r) 0;padding:10px 12px;color:var(--muted);font-size:13px;font-weight:600;display:flex;align-items:center;white-space:nowrap;}
+select.num-unit{cursor:pointer;}
+.input-hint{font-size:12px;color:var(--dim);line-height:1.45;}
+.preview{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:flex;align-items:center;justify-content:center;gap:18px;min-height:110px;}
+.preview svg{max-width:220px;max-height:96px;}
+.perim-read{text-align:left;}
+.perim-read .k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;font-weight:600;}
+.perim-read .v{font-family:'Oswald',sans-serif;font-size:24px;color:var(--yellow);}
 
-/* Shape preview */
-.shape-preview-area{
-  grid-column:1/-1;
-  background:var(--bg3);
-  border:1px solid var(--border);
-  border-radius:var(--r);
-  padding:16px;
-  display:flex;align-items:center;justify-content:center;
-  min-height:120px;
-}
-.shape-preview-area svg{max-width:200px;max-height:100px;}
+.range-row{display:flex;align-items:center;gap:12px;}
+.range-row input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:4px;background:var(--border2);border-radius:2px;outline:none;cursor:pointer;}
+.range-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--yellow);border-radius:50%;border:2px solid var(--bg);box-shadow:0 0 8px var(--yellow-glow);cursor:pointer;}
+.range-row input[type=range]::-moz-range-thumb{width:18px;height:18px;background:var(--yellow);border-radius:50%;border:2px solid var(--bg);cursor:pointer;}
+.range-val{font-family:'Oswald',sans-serif;font-weight:600;font-size:16px;color:var(--yellow);min-width:44px;text-align:right;}
 
-/* ═══════════════════════════════════════════════
-   STEP 3 — RESULTS
-═══════════════════════════════════════════════ */
-.results-hidden{display:none;}
+/* Results */
+.gauge-section{display:flex;flex-direction:column;align-items:center;padding:4px 0 10px;}
+.gauge-wrap{position:relative;width:280px;max-width:100%;}
+.gauge-svg{width:100%;height:auto;display:block;}
+.gauge-center{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);text-align:center;width:100%;}
+.gauge-val{font-family:'Oswald',sans-serif;font-size:50px;font-weight:700;color:var(--yellow);line-height:1;letter-spacing:-1px;}
+.gauge-unit{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:1.5px;margin-top:2px;}
+.gauge-alt{font-size:13px;color:var(--muted);margin-top:8px;text-align:center;}
+.gauge-alt b{color:var(--text);font-weight:600;}
+.empty-msg{color:var(--muted);text-align:center;font-size:14px;padding:6px 0 4px;}
 
-/* Gauge */
-.gauge-section{
-  display:flex;flex-direction:column;align-items:center;
-  padding:10px 0 24px;
-  position:relative;
-}
-.gauge-wrap{position:relative;width:260px;height:140px;margin-bottom:8px;}
-.gauge-svg{width:100%;height:auto;}
-.gauge-center{
-  position:absolute;
-  bottom:0;left:50%;transform:translateX(-50%);
-  text-align:center;
-}
-.gauge-val{
-  font-family:'Oswald',sans-serif;
-  font-size:52px;font-weight:700;
-  color:var(--yellow);line-height:1;
-  letter-spacing:-1px;
-}
-.gauge-unit{
-  font-size:14px;color:var(--muted);font-weight:500;
-  letter-spacing:1px;margin-top:2px;
-}
-.gauge-label{
-  font-size:12px;color:var(--muted);
-  margin-top:6px;letter-spacing:0.3px;
-}
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0;}
+.kv div{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:9px 10px;}
+.kv span{display:block;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;font-weight:700;}
+.kv b{font-family:'Oswald',sans-serif;font-size:17px;font-weight:500;}
 
-/* Safety factor bar */
-.safety-row{
-  width:100%;max-width:400px;
-  display:flex;align-items:center;gap:12px;
-  margin:0 auto 8px;
-}
-.safety-row label{
-  font-size:12px;color:var(--muted);font-weight:500;
-  white-space:nowrap;letter-spacing:0.3px;
-}
-.safety-slider{
-  flex:1;-webkit-appearance:none;appearance:none;
-  height:4px;background:var(--border2);border-radius:2px;
-  outline:none;cursor:pointer;
-}
-.safety-slider::-webkit-slider-thumb{
-  -webkit-appearance:none;width:16px;height:16px;
-  background:var(--yellow);border-radius:50%;
-  border:2px solid var(--bg);
-  box-shadow:0 0 8px var(--yellow-glow);
-  cursor:pointer;
-}
-.safety-val{
-  font-family:'Oswald',sans-serif;font-weight:600;
-  font-size:14px;color:var(--yellow);
-  min-width:36px;text-align:right;
-}
+.formula-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--muted);line-height:1.75;overflow-x:auto;}
+.formula-card code{font-family:'Oswald',sans-serif;color:var(--yellow);font-size:14px;font-weight:500;}
 
-/* Formula breakdown */
-.formula-card{
-  background:var(--bg3);
-  border:1px solid var(--border);
-  border-radius:var(--r);
-  padding:16px 20px;
-  margin:0 0 20px;
-  font-size:13px;color:var(--muted);
-  line-height:1.8;
-}
-.formula-card code{
-  font-family:'Oswald',sans-serif;
-  color:var(--yellow);font-size:14px;font-weight:500;
-}
-.formula-card .eq-line{
-  font-size:12px;color:var(--dim);margin-top:4px;
-}
+.classes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:560px){.classes{grid-template-columns:1fr;}}
+.cls{background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--r2);padding:16px 14px 14px;position:relative;overflow:hidden;transition:all .3s;}
+.cls::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--border);}
+.cls.best{border-color:var(--yellow);box-shadow:0 0 24px rgba(245,193,0,0.15);}
+.cls.best::before{background:var(--yellow);}
+.cls.under{border-color:rgba(248,113,113,.6);opacity:.65;}
+.cls.under::before{background:var(--red);}
+.cls-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;display:inline-block;margin-bottom:8px;}
+.b-best{background:var(--yellow);color:#000;}
+.b-ok{background:var(--yellow-dim);color:var(--yellow);border:1px solid var(--yellow);}
+.b-no{background:var(--red-dim);color:var(--red);border:1px solid var(--red);}
+.cls-cap{font-family:'Oswald',sans-serif;font-size:28px;font-weight:600;line-height:1;}
+.cls.best .cls-cap{color:var(--yellow);}
+.cls-cap small{font-size:13px;color:var(--muted);font-weight:500;margin-left:3px;}
+.cls-type{font-size:12px;color:var(--muted);margin:6px 0 10px;line-height:1.4;min-height:34px;}
+.cap-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px;}
+.cap-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.cap-fill{height:100%;border-radius:3px;background:var(--green);transition:width .6s cubic-bezier(.4,0,.2,1);}
+.cap-fill.warn{background:var(--yellow);}
+.cap-fill.over{background:var(--red);}
 
-/* ═══════════════════════════════════════════════
-   MODEL CARDS
-═══════════════════════════════════════════════ */
-.models-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:14px;
-  margin-top:8px;
-}
-@media(max-width:600px){.models-grid{grid-template-columns:1fr;gap:10px;}}
+.notes{display:flex;flex-direction:column;gap:8px;}
+.note{font-size:13px;line-height:1.6;border-radius:var(--r);padding:10px 12px;border:1px solid;}
+.note strong{display:block;font-family:'Oswald',sans-serif;font-weight:500;letter-spacing:.5px;text-transform:uppercase;font-size:12px;margin-bottom:2px;}
+.n-tip{background:var(--yellow-dim);border-color:rgba(245,193,0,.25);color:#f3d77a;}
+.n-warn{background:var(--red-dim);border-color:rgba(248,113,113,.3);color:#f9a8a8;}
+.n-info{background:rgba(96,165,250,.08);border-color:rgba(96,165,250,.25);color:#a9cdfb;}
 
-.model-card{
-  background:var(--bg3);
-  border:1.5px solid var(--border);
-  border-radius:var(--r2);
-  padding:22px 18px 20px;
-  position:relative;
-  transition:all 0.35s ease;
-  overflow:hidden;
-}
-.model-card::before{
-  content:'';
-  position:absolute;top:0;left:0;right:0;height:3px;
-  background:var(--border);
-  transition:background 0.35s;
-}
-.model-card.match{
-  border-color:var(--yellow);
-  box-shadow:0 0 24px rgba(245,193,0,0.15);
-}
-.model-card.match::before{background:var(--yellow);}
-.model-card.too-small{
-  border-color:var(--red);
-  opacity:0.55;
-}
-.model-card.too-small::before{background:var(--red);}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.btn{background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r);padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;}
+.btn:hover{border-color:var(--yellow);color:var(--yellow);}
+.btn.primary{background:var(--yellow);border-color:var(--yellow);color:#000;}
+.btn.primary:hover{background:#ffd325;color:#000;}
 
-.model-badge{
-  position:absolute;top:16px;right:14px;
-  font-size:10px;font-weight:700;
-  padding:3px 9px;border-radius:20px;
-  text-transform:uppercase;letter-spacing:0.5px;
-}
-.badge-best{background:var(--yellow);color:#000;}
-.badge-ok{background:var(--yellow-dim);color:var(--yellow);border:1px solid var(--yellow);}
-.badge-no{background:var(--red-dim);color:var(--red);border:1px solid var(--red);}
-
-/* Machine SVG illustration inside card */
-.machine-illus{
-  display:flex;justify-content:center;
-  margin:8px 0 14px;
-}
-.machine-illus svg{
-  filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4));
-  transition:filter 0.35s;
-}
-.model-card.match .machine-illus svg{
-  filter:drop-shadow(0 4px 16px rgba(245,193,0,0.3));
-}
-.model-card.too-small .machine-illus svg{opacity:0.4;}
-
-.model-name{
-  font-family:'Oswald',sans-serif;
-  font-size:22px;font-weight:600;letter-spacing:1px;
-  color:var(--text);margin-bottom:12px;
-}
-.model-card.match .model-name{color:var(--yellow);}
-
-.spec-list{display:flex;flex-direction:column;gap:7px;}
-.spec-row{
-  display:flex;justify-content:space-between;align-items:center;
-  font-size:12px;
-  padding-bottom:7px;border-bottom:1px solid var(--border);
-}
-.spec-row:last-child{border-bottom:none;padding-bottom:0;}
-.spec-key{color:var(--muted);}
-.spec-val{
-  font-family:'Oswald',sans-serif;font-size:14px;
-  font-weight:500;color:var(--text);
-}
-.model-card.match .spec-val{color:var(--text);}
-
-/* Capacity bar */
-.cap-bar-wrap{margin:14px 0 4px;}
-.cap-bar-label{
-  display:flex;justify-content:space-between;
-  font-size:11px;color:var(--muted);margin-bottom:5px;
-}
-.cap-bar-track{
-  height:5px;background:var(--border);
-  border-radius:3px;overflow:hidden;
-}
-.cap-bar-fill{
-  height:100%;border-radius:3px;
-  background:var(--yellow);
-  transition:width 0.7s cubic-bezier(0.4,0,0.2,1);
-}
-.cap-bar-fill.overload{background:var(--red);}
-.cap-bar-fill.ok{background:var(--green);}
-
-.model-status{
-  display:flex;align-items:center;gap:7px;
-  margin-top:14px;font-size:12px;font-weight:600;
-}
-.status-dot{width:7px;height:7px;border-radius:50%;}
-
-/* ═══════════════════════════════════════════════
-   CTA SECTION
-═══════════════════════════════════════════════ */
-.cta-strip{
-  margin-top:28px;
-  background:var(--yellow-dim);
-  border:1px solid rgba(245,193,0,0.25);
-  border-radius:var(--r2);
-  padding:22px 28px;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:16px;
-}
-.cta-text h3{
-  font-family:'Oswald',sans-serif;font-size:20px;font-weight:600;
-  color:var(--yellow);letter-spacing:0.5px;
-}
-.cta-text p{font-size:13px;color:var(--muted);margin-top:4px;}
-.cta-btn{
-  background:var(--yellow);color:#000;
-  border:none;border-radius:var(--r);
-  padding:12px 28px;
-  font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;
-  letter-spacing:1px;text-transform:uppercase;
-  cursor:pointer;
-  transition:all 0.18s;white-space:nowrap;
-  text-decoration:none;display:inline-block;
-}
+/* CTA */
+.cta-strip{margin-top:12px;background:linear-gradient(135deg,rgba(245,193,0,.16),rgba(245,193,0,.04));border:1px solid rgba(245,193,0,0.3);border-radius:var(--r2);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.cta-k{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--yellow);margin-bottom:4px;}
+.cta-text h2{font-family:'Oswald',sans-serif;font-size:24px;font-weight:600;letter-spacing:0.5px;line-height:1.15;}
+.cta-text p{font-size:14px;color:var(--muted);margin-top:6px;max-width:600px;line-height:1.6;}
+.cta-btn{background:var(--yellow);color:#000;border-radius:var(--r);padding:13px 26px;font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;letter-spacing:1px;text-transform:uppercase;transition:all 0.18s;white-space:nowrap;text-decoration:none;display:inline-block;}
 .cta-btn:hover{background:#ffd325;transform:translateY(-1px);}
 
-/* ═══════════════════════════════════════════════
-   NAV BUTTONS
-═══════════════════════════════════════════════ */
-.nav-row{
-  display:flex;justify-content:space-between;
-  align-items:center;margin-top:24px;gap:12px;
-}
-.btn-back{
-  background:transparent;
-  border:1.5px solid var(--border2);
-  border-radius:var(--r);
-  padding:11px 24px;
-  color:var(--muted);
-  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;
-  cursor:pointer;transition:all 0.18s;
-}
-.btn-back:hover{border-color:var(--muted);color:var(--text);}
-.btn-next{
-  background:var(--yellow);color:#000;
-  border:none;border-radius:var(--r);
-  padding:11px 32px;
-  font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;
-  letter-spacing:1px;text-transform:uppercase;
-  cursor:pointer;transition:all 0.18s;
-  display:flex;align-items:center;gap:8px;
-}
-.btn-next:hover{background:#ffd325;transform:translateY(-1px);}
-.btn-next:disabled{background:var(--border2);color:var(--dim);cursor:not-allowed;transform:none;}
-.btn-recalc{
-  background:var(--bg3);
-  border:1.5px solid var(--border2);
-  border-radius:var(--r);
-  padding:11px 24px;
-  color:var(--text);
-  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;
-  cursor:pointer;transition:all 0.18s;
-}
-.btn-recalc:hover{border-color:var(--yellow);color:var(--yellow);}
-
-/* ═══════════════════════════════════════════════
-   FOOTNOTE
-═══════════════════════════════════════════════ */
-.footnote{
-  text-align:center;font-size:11px;color:var(--dim);
-  margin-top:32px;line-height:1.7;
-  border-top:1px solid var(--border);padding-top:20px;
-}
+.footnote{text-align:center;font-size:12px;color:var(--dim);margin-top:28px;line-height:1.75;border-top:1px solid var(--border);padding-top:18px;}
 .footnote a{color:var(--yellow);text-decoration:none;}
 
-/* ═══════════════════════════════════════════════
-   ANIMATIONS
-═══════════════════════════════════════════════ */
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(16px);}
-  to{opacity:1;transform:translateY(0);}
-}
-.anim-in{animation:fadeUp 0.4s ease both;}
-.anim-in-d1{animation-delay:0.05s;}
-.anim-in-d2{animation-delay:0.10s;}
-.anim-in-d3{animation-delay:0.15s;}
-.anim-in-d4{animation-delay:0.20s;}
-
-/* Gauge needle animation */
-@keyframes sweepNeedle{
-  from{stroke-dashoffset:440;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.anim-in{animation:fadeUp 0.35s ease both;}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;}}
+@media print{
+  body{background:#fff;color:#000;} body::before{display:none;}
+  .unit-toggle,.actions,.cta-strip,.cat-tabs,.shape-row{display:none!important;}
+  .layout{display:block;} .card,.cls,.kv div,.formula-card,.note{background:#fff!important;border-color:#bbb!important;color:#000!important;break-inside:avoid;}
+  .mat-btn:not([aria-pressed="true"]){display:none;}
 }
 </style>
 </head>
@@ -553,11 +183,9 @@ body::before{
 
 <div class="wrapper">
 
-  <!-- ── HEADER ──────────────────────────────── -->
   <header class="site-header">
     <div class="brand">
-      <div class="brand-logo">
-        <!-- Metal Press logo mark -->
+      <div class="brand-logo" aria-hidden="true">
         <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="4" y="4" width="32" height="8" rx="2" fill="#000"/>
           <rect x="8" y="14" width="24" height="3" rx="1.5" fill="#000"/>
@@ -566,609 +194,515 @@ body::before{
         </svg>
       </div>
       <div class="brand-text">
-        <div class="name">Metal Press</div>
-        <div class="sub">MTP Series · Trim Press Tonnage Calculator</div>
+        <h1>Trim Press Tonnage Calculator</h1>
+        <div class="sub">Die casting · Forging · Sheet metal trimming &amp; blanking</div>
       </div>
     </div>
-    <div class="unit-toggle">
-      <button id="btnUS" class="active" onclick="setUnit('us')">US / Inch</button>
-      <button id="btnMM" onclick="setUnit('mm')">Metric / mm</button>
+    <div class="unit-toggle" role="group" aria-label="Units">
+      <button type="button" data-unit="us" aria-pressed="true">US / inch</button>
+      <button type="button" data-unit="mm" aria-pressed="false">Metric / mm</button>
     </div>
   </header>
 
-  <!-- ── STEPS BAR ─────────────────────────── -->
-  <div class="steps-bar">
-    <div class="step-item active" id="si1">
-      <div class="step-num">1</div>
-      <div class="step-label">Material</div>
-    </div>
-    <div class="step-item" id="si2">
-      <div class="step-num">2</div>
-      <div class="step-label">Part Dimensions</div>
-    </div>
-    <div class="step-item" id="si3">
-      <div class="step-num">3</div>
-      <div class="step-label">Results &amp; Model</div>
-    </div>
-  </div>
-
-  <!-- ════════════════════════════════════════
-       STEP 1 — MATERIAL SELECTION
-  ════════════════════════════════════════ -->
-  <div id="step1">
-    <div class="card active-card anim-in">
-      <div class="card-heading">Select Material</div>
-      <div class="material-grid" id="matGrid"></div>
-      <div class="nav-row">
-        <div></div>
-        <button class="btn-next" id="btnNext1" onclick="goStep(2)" disabled>
-          Next: Part Dimensions
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ════════════════════════════════════════
-       STEP 2 — DIMENSIONS
-  ════════════════════════════════════════ -->
-  <div id="step2" style="display:none;">
-    <div class="card active-card anim-in">
-      <div class="card-heading">Part Shape &amp; Dimensions</div>
-      <div class="dim-layout">
-        <!-- Shape selector -->
-        <div class="shape-row">
-          <button class="shape-btn active" id="sh-round" onclick="setShape('round')">
-            <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
-            Round
-          </button>
-          <button class="shape-btn" id="sh-square" onclick="setShape('square')">
-            <svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
-            Square
-          </button>
-          <button class="shape-btn" id="sh-rect" onclick="setShape('rect')">
-            <svg viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="8" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
-            Rectangle
-          </button>
-          <button class="shape-btn" id="sh-custom" onclick="setShape('custom')">
-            <svg viewBox="0 0 16 16"><path d="M2 12 L6 3 L10 9 L13 5 L14 12 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>
-            Custom
-          </button>
-        </div>
-
-        <!-- Shape inputs (change by shape) -->
-        <div id="dimInputsWrap"></div>
-
-        <!-- Thickness -->
-        <div class="input-group">
-          <label>Material Thickness</label>
-          <div class="input-row">
-            <input class="num-input" type="number" id="thicknessInput" placeholder="0.00" step="0.001" min="0.001" oninput="updateCalc()">
-            <div class="num-unit" id="thickUnit">in</div>
-          </div>
-          <div class="input-hint" id="thickHint">e.g. 0.125 in = 10 gauge mild steel</div>
-        </div>
-
-        <!-- Computed perimeter display -->
-        <div class="input-group" id="perimeterDisplay" style="display:none;">
-          <label>Computed Perimeter</label>
-          <div class="input-row">
-            <div class="num-input" id="perimReadout" style="display:flex;align-items:center;color:var(--yellow);">—</div>
-            <div class="num-unit" id="perimUnit">in</div>
-          </div>
-          <div class="input-hint">Auto-calculated from shape above</div>
-        </div>
-
-        <!-- Shape SVG preview -->
-        <div class="shape-preview-area" id="shapePreview">
-          <svg id="svgPreview" viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="110" cy="55" r="46" fill="none" stroke="#F5C100" stroke-width="2.5" stroke-dasharray="6 3"/>
-          </svg>
-        </div>
-      </div>
-
-      <div class="nav-row">
-        <button class="btn-back" onclick="goStep(1)">← Back</button>
-        <button class="btn-next" id="btnNext2" onclick="goStep(3)" disabled>
-          Calculate Tonnage
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ════════════════════════════════════════
-       STEP 3 — RESULTS
-  ════════════════════════════════════════ -->
-  <div id="step3" style="display:none;">
-    <div class="card active-card anim-in">
-      <div class="card-heading">Tonnage Calculation</div>
-
-      <!-- Gauge -->
-      <div class="gauge-section">
-        <div class="gauge-wrap">
-          <svg class="gauge-svg" viewBox="0 0 260 140" xmlns="http://www.w3.org/2000/svg">
-            <!-- Track arc -->
-            <path d="M 20 130 A 110 110 0 0 1 240 130" fill="none" stroke="#2a2a2a" stroke-width="12" stroke-linecap="round"/>
-            <!-- Fill arc -->
-            <path id="gaugeArc" d="M 20 130 A 110 110 0 0 1 240 130" fill="none" stroke="#F5C100" stroke-width="12" stroke-linecap="round"
-              stroke-dasharray="345" stroke-dashoffset="345" style="transition:stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1);"/>
-            <!-- Zone ticks -->
-            <text x="14" y="144" fill="#555" font-size="11" font-family="Oswald">0</text>
-            <text x="108" y="22" fill="#555" font-size="11" font-family="Oswald" text-anchor="middle">50</text>
-            <text x="234" y="144" fill="#555" font-size="11" font-family="Oswald">75</text>
-          </svg>
-          <div class="gauge-center">
-            <div class="gauge-val" id="gaugeVal">0</div>
-            <div class="gauge-unit">TONS REQUIRED</div>
+  <div class="layout">
+    <!-- INPUTS -->
+    <div>
+      <section class="card anim-in" aria-labelledby="h1">
+        <div class="card-heading" id="h1"><span class="step-n">1</span>Material <span class="aside">ultimate shear strength</span></div>
+        <div class="cat-tabs" id="catTabs"></div>
+        <div class="material-grid" id="matGrid"></div>
+        <div class="custom-mat" id="customMat">
+          <div class="input-group">
+            <label for="customShear">Shear strength</label>
+            <div class="input-row">
+              <input class="num-input" type="number" id="customShear" min="1" step="any" placeholder="0">
+              <select class="num-unit" id="customShearUnit" aria-label="Shear strength unit"><option value="mpa">MPa</option><option value="ksi">ksi</option></select>
+            </div>
+            <div class="input-hint">No shear data? Use about 0.6–0.8 × ultimate tensile strength. Use the high end for hard or high-strength alloys.</div>
           </div>
         </div>
-        <div class="gauge-label" id="gaugeSub">With <span id="safePctLabel">20</span>% safety factor applied</div>
-        <div class="safety-row" style="margin-top:12px;">
-          <label>Safety Factor</label>
-          <input type="range" class="safety-slider" id="safetySlider" min="10" max="30" value="20" step="5" oninput="updateSafety()">
-          <div class="safety-val" id="safetyPctVal">20%</div>
+      </section>
+
+      <section class="card anim-in" aria-labelledby="h2" style="animation-delay:.05s">
+        <div class="card-heading" id="h2"><span class="step-n">2</span>Trim line &amp; thickness</div>
+        <div class="shape-row" id="shapeRow">
+          <button class="shape-btn" type="button" data-shape="round" aria-pressed="true"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Round</button>
+          <button class="shape-btn" type="button" data-shape="square" aria-pressed="false"><svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Square</button>
+          <button class="shape-btn" type="button" data-shape="rect" aria-pressed="false"><svg viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="8" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Rectangle</button>
+          <button class="shape-btn" type="button" data-shape="slot" aria-pressed="false"><svg viewBox="0 0 16 16"><rect x="1" y="4.5" width="14" height="7" rx="3.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Slot</button>
+          <button class="shape-btn" type="button" data-shape="custom" aria-pressed="false"><svg viewBox="0 0 16 16"><path d="M2 12 L6 3 L10 9 L13 5 L14 12 Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>Custom / CAD</button>
         </div>
-      </div>
+        <div class="dim-layout">
+          <div id="dimInputs" class="span2 dim-layout"></div>
+          <div class="input-group">
+            <label for="thick" id="thickLbl">Material thickness</label>
+            <div class="input-row"><input class="num-input" type="number" id="thick" placeholder="0.000" step="any" min="0"><div class="num-unit u-len">in</div></div>
+            <div class="input-hint" id="thickHint"></div>
+          </div>
+          <div class="input-group">
+            <label for="extra">Extra cut length</label>
+            <div class="input-row"><input class="num-input" type="number" id="extra" placeholder="0" step="any" min="0"><div class="num-unit u-len">in</div></div>
+            <div class="input-hint">Pierced holes, windows, gates and overflows trimmed in the same stroke</div>
+          </div>
+          <div class="preview span2" id="preview"></div>
+        </div>
+      </section>
 
-      <!-- Formula -->
-      <div class="formula-card anim-in anim-in-d1" id="formulaCard"></div>
-
-      <div class="card-heading" style="margin-top:4px;">Model Recommendation</div>
-
-      <!-- Model Cards -->
-      <div class="models-grid" id="modelsGrid"></div>
-
-      <div class="nav-row" style="margin-top:20px;">
-        <button class="btn-recalc" onclick="goStep(1)">↺ Recalculate</button>
-        <button class="btn-back" onclick="goStep(2)">← Edit Dimensions</button>
-      </div>
+      <section class="card anim-in" aria-labelledby="h3" style="animation-delay:.1s">
+        <div class="card-heading" id="h3"><span class="step-n">3</span>Die &amp; safety factors</div>
+        <div class="dim-layout">
+          <div class="input-group">
+            <label for="cav">Parts per stroke (cavities)</label>
+            <div class="input-row"><input class="num-input" type="number" id="cav" value="1" min="1" max="64" step="1"><div class="num-unit">×</div></div>
+            <div class="input-hint">Multi-cavity trim dies cut every part at once</div>
+          </div>
+          <div class="input-group">
+            <label for="strip">Stripping allowance</label>
+            <div class="range-row"><input type="range" id="strip" min="0" max="25" step="1" value="10" aria-describedby="stripVal"><span class="range-val" id="stripVal">10%</span></div>
+            <div class="input-hint">Force to strip the part or scrap off the punch, typically 5–20%</div>
+          </div>
+          <div class="input-group span2">
+            <label for="safety">Safety margin</label>
+            <div class="range-row"><input type="range" id="safety" min="0" max="50" step="5" value="20" aria-describedby="safetyVal"><span class="range-val" id="safetyVal">20%</span></div>
+            <div class="input-hint">Covers dull tooling, material variation and off-center loads. 20–30% is common for production.</div>
+          </div>
+        </div>
+      </section>
     </div>
 
-    <!-- CTA -->
-    <div class="cta-strip anim-in anim-in-d3">
-      <div class="cta-text">
-        <h3>Ready to specify your press?</h3>
-        <p>Contact the Metal Press team for detailed quotes, die fit analysis, and delivery timelines.</p>
-      </div>
-      <a href="https://metalpressmachinery.com/" target="_blank" class="cta-btn">Request a Quote →</a>
+    <!-- RESULTS -->
+    <div class="results-col">
+      <section class="card" aria-live="polite" aria-labelledby="h4">
+        <div class="card-heading" id="h4">Required press capacity</div>
+        <div class="gauge-section">
+          <div class="gauge-wrap">
+            <svg class="gauge-svg" viewBox="0 0 280 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M 20 140 A 120 120 0 0 1 260 140" fill="none" stroke="#2a2a2a" stroke-width="14" stroke-linecap="round"/>
+              <path id="gaugeArc" d="M 20 140 A 120 120 0 0 1 260 140" fill="none" stroke="#F5C100" stroke-width="14" stroke-linecap="round" style="transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1),stroke .3s;"/>
+              <text x="14" y="149" fill="#6f6f6f" font-size="11" font-family="Oswald">0</text>
+              <text id="gMid" x="140" y="12" fill="#6f6f6f" font-size="11" font-family="Oswald" text-anchor="middle"></text>
+              <text id="gMax" x="266" y="149" fill="#6f6f6f" font-size="11" font-family="Oswald" text-anchor="end"></text>
+            </svg>
+            <div class="gauge-center">
+              <div class="gauge-val" id="gaugeVal">—</div>
+              <div class="gauge-unit" id="gaugeUnit">US TONS</div>
+            </div>
+          </div>
+          <div class="gauge-alt" id="gaugeAlt"></div>
+        </div>
+        <div id="resultBody">
+          <div class="kv" id="kv"></div>
+          <div class="formula-card" id="formula"></div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" type="button" id="btnCopy">📋 Copy summary</button>
+          <button class="btn" type="button" id="btnShare">🔗 Share link</button>
+          <button class="btn" type="button" id="btnPrint">⎙ Print</button>
+          <button class="btn" type="button" id="btnReset">↺ Reset</button>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="h5">
+        <div class="card-heading" id="h5">Press class recommendation <span class="aside">≤ 80% utilization target</span></div>
+        <div class="classes" id="classes"></div>
+      </section>
+
+      <section class="card" aria-labelledby="h6">
+        <div class="card-heading" id="h6">Engineering notes</div>
+        <div class="notes" id="notes"></div>
+      </section>
     </div>
   </div>
 
-  <!-- ── FOOTNOTE ──────────────────────────── -->
+  <aside class="cta-strip" aria-label="Contact">
+    <div class="cta-text">
+      <div class="cta-k">For press builders, die shops &amp; foundries</div>
+      <h2>Want this calculator for your business?</h2>
+      <p>I build custom engineering calculators and product configurators that match your machines and brand, help buyers pick the right model, and send qualified quote requests straight to your sales team. Reach out to get started.</p>
+    </div>
+    <a href="https://zov911.com" target="_blank" rel="noopener" class="cta-btn">Reach out → zov911.com</a>
+  </aside>
+
   <div class="footnote">
-    Tonnage formula: <em>T = Perimeter × Thickness × Material Constant</em> (Dayton Rogers / AHSS methodology) · Results are engineering estimates; always add 20%+ safety factor for production use.<br>
-    Tool built for <a href="https://metalpressmachinery.com" target="_blank">metalpressmachinery.com</a> · Portfolio demo
+    Method: <em>F = cut length × thickness × shear strength × parts per stroke × (1 + stripping) × (1 + safety margin)</em>. Shear strengths are typical room-temperature values from published handbook data (hot-trim values are approximate). Use certified mill or supplier data for final design. Results are engineering estimates, not a substitute for press-builder or die-designer review.<br>
+    © <span id="yr">2026</span> zov911 · Designed &amp; built by <a href="https://zov911.com" target="_blank" rel="noopener">zov911</a>
   </div>
 
-</div><!-- /wrapper -->
+</div>
 
 <script>
 /* ═══════════════════════════════════════════════════
-   DATA
+   MATERIALS: single source of truth = shear strength in MPa.
+   US results convert from it, so both unit systems always agree.
 ═══════════════════════════════════════════════════ */
+const MPA_PER_KSI = 6.894757;
+const KN_PER_SHORT_TON = 8.896443;
+const KN_PER_TONNE = 9.80665;
 
-// Material constants (US: tons per in·in·constant)
-// Formula: Tons = Perimeter(in) × Thickness(in) × constant
-// Metric: kN = Perimeter(mm) × Thickness(mm) × shearMPa/1000, then /8.896 for metric tons, ×1.10231 for short tons
+const CATS = [
+  {id:'diecast', label:'Die-cast alloys'},
+  {id:'sheet',   label:'Sheet & plate'},
+  {id:'forge',   label:'Forgings'},
+  {id:'custom',  label:'Custom'},
+];
+
 const MATERIALS = [
-  { id:'alum_soft',  icon:'🔩', name:'Aluminum',        grade:'Soft / 1100',      constUS:11,  shearMPa: 62,  color:'#93c5fd' },
-  { id:'alum_t6',    icon:'🔩', name:'Aluminum',        grade:'T6 / 6061',        constUS:15,  shearMPa: 207, color:'#60a5fa' },
-  { id:'copper',     icon:'🪙', name:'Copper',           grade:'¼ Hard',           constUS:17,  shearMPa: 200, color:'#fb923c' },
-  { id:'brass_soft', icon:'🟡', name:'Brass',            grade:'Soft',             constUS:22,  shearMPa: 290, color:'#fbbf24' },
-  { id:'brass_hard', icon:'🟡', name:'Brass',            grade:'½ Hard',           constUS:25,  shearMPa: 386, color:'#f59e0b' },
-  { id:'mild_hr',    icon:'⬜', name:'Mild Steel',       grade:'Hot Rolled',       constUS:27,  shearMPa: 345, color:'#94a3b8' },
-  { id:'mild_cr',    icon:'⬛', name:'Mild Steel',       grade:'Cold Rolled',      constUS:32,  shearMPa: 414, color:'#64748b' },
-  { id:'ss_ann',     icon:'🔘', name:'Stainless Steel',  grade:'304 Annealed',     constUS:37,  shearMPa: 483, color:'#e2e8f0' },
-  { id:'ss_half',    icon:'⚪', name:'Stainless Steel',  grade:'316 / ½ Hard',     constUS:50,  shearMPa: 621, color:'#cbd5e1' },
-  { id:'hs_steel',   icon:'🔴', name:'High-Str. Steel',  grade:'AHSS / DP600',     constUS:55,  shearMPa: 690, color:'#f87171' },
+  {id:'a380',    cat:'diecast', name:'Aluminum A380',    grade:'HPDC · ADC12 / A383 similar', mpa:190, color:'#93c5fd'},
+  {id:'a360',    cat:'diecast', name:'Aluminum A360',    grade:'HPDC · pressure-tight parts', mpa:180, color:'#7dd3fc'},
+  {id:'struct',  cat:'diecast', name:'Structural HPDC',  grade:'AlSi10MnMg · as-cast',         mpa:175, color:'#60a5fa'},
+  {id:'zamak3',  cat:'diecast', name:'Zinc Zamak 3',     grade:'Hot chamber',                  mpa:214, color:'#cbd5e1'},
+  {id:'zamak5',  cat:'diecast', name:'Zinc Zamak 5',     grade:'Hot chamber',                  mpa:262, color:'#e2e8f0'},
+  {id:'za8',     cat:'diecast', name:'Zinc ZA-8',        grade:'Hot chamber',                  mpa:275, color:'#f1f5f9'},
+  {id:'az91',    cat:'diecast', name:'Magnesium AZ91D',  grade:'HPDC',                         mpa:140, color:'#a7f3d0'},
+
+  {id:'al1100',  cat:'sheet', name:'Aluminum 1100',      grade:'O (annealed)',     mpa:62,  color:'#bfdbfe'},
+  {id:'al5052',  cat:'sheet', name:'Aluminum 5052',      grade:'H32',              mpa:117, color:'#93c5fd'},
+  {id:'al6061',  cat:'sheet', name:'Aluminum 6061',      grade:'T6',               mpa:207, color:'#60a5fa'},
+  {id:'cu110',   cat:'sheet', name:'Copper C110',        grade:'½ hard',           mpa:185, color:'#fb923c'},
+  {id:'brass',   cat:'sheet', name:'Brass C260',         grade:'½ hard',           mpa:290, color:'#fbbf24'},
+  {id:'mild',    cat:'sheet', name:'Mild Steel',         grade:'CS / A36 · HR or CR', mpa:345, color:'#94a3b8'},
+  {id:'hsla',    cat:'sheet', name:'HSLA Steel',         grade:'Grade 50 (340 MPa)', mpa:380, color:'#64748b'},
+  {id:'ss304',   cat:'sheet', name:'Stainless 304',      grade:'Annealed',         mpa:483, color:'#e2e8f0'},
+  {id:'ss316h',  cat:'sheet', name:'Stainless 316',      grade:'½ hard',           mpa:620, color:'#cbd5e1'},
+  {id:'dp600',   cat:'sheet', name:'AHSS DP600',         grade:'Dual phase',       mpa:480, color:'#f87171'},
+  {id:'dp980',   cat:'sheet', name:'AHSS DP980',         grade:'Dual phase',       mpa:785, color:'#ef4444'},
+
+  {id:'fhot',    cat:'forge', name:'Steel Forging',      grade:'Hot trim ~1,000–1,100 °C', mpa:120, color:'#fdba74'},
+  {id:'fcold',   cat:'forge', name:'Steel Forging',      grade:'Cold trim · 1045 normalized', mpa:490, color:'#94a3b8'},
+  {id:'falu',    cat:'forge', name:'Aluminum Forging',   grade:'6061-T6 · cold trim', mpa:207, color:'#60a5fa'},
+
+  {id:'custom',  cat:'custom', name:'Custom material',   grade:'Enter shear strength', mpa:0, color:'#F5C100'},
 ];
 
-const MODELS = [
-  {
-    name:'MTP-35', tons:35,
-    specUS:{ tieD:'22"', tieW:'38"', stroke:'18"', daylightMin:'14"', daylightMax:'32"', tieDia:'3.5"' },
-    specMM:{ tieD:'560mm', tieW:'970mm', stroke:'460mm', daylightMin:'355mm', daylightMax:'815mm', tieDia:'90mm' },
-    height:90,
-  },
-  {
-    name:'MTP-50', tons:50,
-    specUS:{ tieD:'25"', tieW:'48"', stroke:'20"', daylightMin:'15"', daylightMax:'35"', tieDia:'4"' },
-    specMM:{ tieD:'640mm', tieW:'1220mm', stroke:'510mm', daylightMin:'380mm', daylightMax:'890mm', tieDia:'100mm' },
-    height:110,
-  },
-  {
-    name:'MTP-75', tons:75,
-    specUS:{ tieD:'28"', tieW:'52"', stroke:'25"', daylightMin:'20"', daylightMax:'45"', tieDia:'4.5"' },
-    specMM:{ tieD:'715mm', tieW:'1325mm', stroke:'635mm', daylightMin:'500mm', daylightMax:'1035mm', tieDia:'115mm' },
-    height:130,
-  },
-];
+/* Standard press capacity classes (in the active unit: US tons or metric tonnes) */
+const CLASSES = [10,15,25,35,50,75,100,150,200,300,400,500,630,800,1000,1250,1600];
+const UTIL_TARGET = 0.80;
+
+function classType(cap){
+  if(cap <= 35)  return 'Bench, C-frame or small 4-post hydraulic trim press';
+  if(cap <= 150) return '4-post hydraulic trim press, often with side-shift or shuttle bolster';
+  if(cap <= 400) return 'Heavy hydraulic or servo trim press for large castings and forgings';
+  return 'Large-bed hydraulic / servo press for structural & mega-castings';
+}
 
 /* ═══════════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════════════ */
-let unit = 'us';     // 'us' | 'mm'
-let selMat = null;
-let shape = 'round'; // 'round'|'square'|'rect'|'custom'
-let safetyPct = 20;
-let currentStep = 1;
-let calcResult = { raw:0, safe:0, perimeter:0, thickness:0 };
+const DEFAULTS = {unit:'us', cat:'diecast', mat:null, shape:'round', d1:'', d2:'', thick:'', extra:'', cav:1, strip:10, safety:20, cShear:'', cShearUnit:'mpa'};
+let S = {...DEFAULTS};
+let lastSummary = '';
+const $ = id => document.getElementById(id);
+const fmt = (n, d=1) => Number(n).toLocaleString(undefined,{minimumFractionDigits:d, maximumFractionDigits:d});
 
 /* ═══════════════════════════════════════════════════
-   INIT
+   UI BUILDERS
 ═══════════════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => {
-  buildMaterialGrid();
-  renderDimInputs();
-});
-
-/* ═══════════════════════════════════════════════════
-   UNIT TOGGLE
-═══════════════════════════════════════════════════ */
-function setUnit(u){
-  unit = u;
-  document.getElementById('btnUS').classList.toggle('active', u==='us');
-  document.getElementById('btnMM').classList.toggle('active', u==='mm');
-  document.getElementById('thickUnit').textContent = u==='us' ? 'in' : 'mm';
-  document.getElementById('perimUnit').textContent = u==='us' ? 'in' : 'mm';
-  document.getElementById('thickHint').textContent =
-    u==='us' ? 'e.g. 0.125 in = 10 gauge mild steel' : 'e.g. 3.175 mm = 10 gauge mild steel';
-  renderDimInputs();
-  updateCalc();
+function buildCats(){
+  $('catTabs').innerHTML = CATS.map(c => `<button type="button" data-cat="${c.id}" aria-pressed="${c.id === S.cat}">${c.label}</button>`).join('');
+}
+function buildMaterials(){
+  const list = MATERIALS.filter(m => m.cat === S.cat);
+  $('matGrid').innerHTML = list.map(m => `
+    <button class="mat-btn" type="button" data-mat="${m.id}" aria-pressed="${m.id === S.mat}">
+      <span class="mat-name"><span class="mat-swatch" style="background:${m.color}"></span>${m.name}</span>
+      <span class="mat-grade">${m.grade}</span>
+      ${m.mpa ? `<span class="mat-shear">${m.mpa} MPa · ${fmt(m.mpa / MPA_PER_KSI, 0)} ksi</span>` : ''}
+    </button>`).join('');
+  $('customMat').classList.toggle('show', S.cat === 'custom');
 }
 
-/* ═══════════════════════════════════════════════════
-   MATERIAL GRID
-═══════════════════════════════════════════════════ */
-function buildMaterialGrid(){
-  const g = document.getElementById('matGrid');
-  g.innerHTML = '';
-  MATERIALS.forEach(m => {
-    const btn = document.createElement('button');
-    btn.className = 'mat-btn';
-    btn.id = 'mat-'+m.id;
-    btn.innerHTML = `
-      <div class="mat-icon">${m.icon}</div>
-      <div class="mat-name">${m.name}</div>
-      <div class="mat-const">${m.grade}</div>
-    `;
-    btn.onclick = () => selectMat(m.id);
-    g.appendChild(btn);
-  });
-}
-
-function selectMat(id){
-  selMat = MATERIALS.find(m=>m.id===id);
-  document.querySelectorAll('.mat-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('mat-'+id).classList.add('active');
-  document.getElementById('btnNext1').disabled = false;
-}
-
-/* ═══════════════════════════════════════════════════
-   SHAPE SELECTOR
-═══════════════════════════════════════════════════ */
-function setShape(s){
-  shape = s;
-  ['round','square','rect','custom'].forEach(id=>{
-    document.getElementById('sh-'+id).classList.toggle('active', id===s);
-  });
-  renderDimInputs();
-  updateCalc();
-}
-
-function renderDimInputs(){
-  const wrap = document.getElementById('dimInputsWrap');
-  const unitLabel = unit==='us' ? 'in' : 'mm';
-  const hints = {
-    us:{ dia:'e.g. 4.5 in diameter', side:'e.g. 6 in per side', w:'Width in inches', h:'Height in inches', p:'Total cut perimeter' },
-    mm:{ dia:'e.g. 115 mm diameter', side:'e.g. 152 mm per side', w:'Width in mm', h:'Height in mm', p:'Total cut perimeter in mm' },
-  };
-  const h = hints[unit];
-
-  const perimDisp = document.getElementById('perimeterDisplay');
-
-  if(shape==='round'){
-    wrap.innerHTML = `
-      <div class="input-group">
-        <label>Hole / Part Diameter</label>
-        <div class="input-row">
-          <input class="num-input" type="number" id="dim1" placeholder="0.00" step="0.01" min="0.01" oninput="updateCalc()">
-          <div class="num-unit">${unitLabel}</div>
-        </div>
-        <div class="input-hint">${h.dia}</div>
-      </div>`;
-    perimDisp.style.display='flex';
-    updateSVG_round(50);
-  } else if(shape==='square'){
-    wrap.innerHTML = `
-      <div class="input-group">
-        <label>Side Length</label>
-        <div class="input-row">
-          <input class="num-input" type="number" id="dim1" placeholder="0.00" step="0.01" min="0.01" oninput="updateCalc()">
-          <div class="num-unit">${unitLabel}</div>
-        </div>
-        <div class="input-hint">${h.side}</div>
-      </div>`;
-    perimDisp.style.display='flex';
-    updateSVG_square(60);
-  } else if(shape==='rect'){
-    wrap.innerHTML = `
-      <div class="input-group">
-        <label>Width</label>
-        <div class="input-row">
-          <input class="num-input" type="number" id="dim1" placeholder="0.00" step="0.01" min="0.01" oninput="updateCalc()">
-          <div class="num-unit">${unitLabel}</div>
-        </div>
-        <div class="input-hint">${h.w}</div>
-      </div>
-      <div class="input-group">
-        <label>Height</label>
-        <div class="input-row">
-          <input class="num-input" type="number" id="dim2" placeholder="0.00" step="0.01" min="0.01" oninput="updateCalc()">
-          <div class="num-unit">${unitLabel}</div>
-        </div>
-        <div class="input-hint">${h.h}</div>
-      </div>`;
-    perimDisp.style.display='flex';
-    updateSVG_rect(100,55);
-  } else {
-    // Custom perimeter
-    wrap.innerHTML = `
-      <div class="input-group" style="grid-column:1/-1">
-        <label>Known Cut Perimeter</label>
-        <div class="input-row">
-          <input class="num-input" type="number" id="dim1" placeholder="0.00" step="0.01" min="0.01" oninput="updateCalc()">
-          <div class="num-unit">${unitLabel}</div>
-        </div>
-        <div class="input-hint">${h.p}</div>
-      </div>`;
-    perimDisp.style.display='none';
-    updateSVG_custom();
-  }
-  if(wrap.querySelector('#dim1')) wrap.querySelector('#dim1').addEventListener('input',updateCalc);
-  if(wrap.querySelector('#dim2')) wrap.querySelector('#dim2').addEventListener('input',updateCalc);
-}
-
-/* ── SVG Previews ── */
-function updateSVG_round(r){
-  document.getElementById('svgPreview').innerHTML = `
-    <text x="110" y="12" fill="#555" font-size="11" font-family="Oswald" text-anchor="middle" id="svgDimLabel">Ø</text>
-    <circle id="svgShape" cx="110" cy="58" r="${r}" fill="rgba(245,193,0,0.08)" stroke="#F5C100" stroke-width="2" stroke-dasharray="6 3"/>
-    <line x1="${110-r}" y1="58" x2="${110+r}" y2="58" stroke="#555" stroke-width="1" stroke-dasharray="3 2"/>
-    <text x="110" y="76" fill="#F5C100" font-size="10" font-family="Oswald" text-anchor="middle" id="svgDimText">diameter</text>`;
-}
-function updateSVG_square(s){
-  const x=110-s/2, y=30;
-  document.getElementById('svgPreview').innerHTML = `
-    <rect id="svgShape" x="${x}" y="${y}" width="${s}" height="${s}" fill="rgba(245,193,0,0.08)" stroke="#F5C100" stroke-width="2" stroke-dasharray="6 3" rx="1"/>
-    <text x="110" y="${y+s+16}" fill="#F5C100" font-size="10" font-family="Oswald" text-anchor="middle">side × 4</text>`;
-}
-function updateSVG_rect(w,h){
-  const x=(220-w)/2, y=(110-h)/2;
-  document.getElementById('svgPreview').innerHTML = `
-    <rect id="svgShape" x="${x}" y="${y}" width="${w}" height="${h}" fill="rgba(245,193,0,0.08)" stroke="#F5C100" stroke-width="2" stroke-dasharray="6 3" rx="1"/>
-    <text x="110" y="${y+h+14}" fill="#F5C100" font-size="10" font-family="Oswald" text-anchor="middle">2×(W+H)</text>`;
-}
-function updateSVG_custom(){
-  document.getElementById('svgPreview').innerHTML = `
-    <text x="110" y="55" fill="#555" font-size="13" font-family="Oswald" text-anchor="middle">Enter Known</text>
-    <text x="110" y="72" fill="#F5C100" font-size="13" font-family="Oswald" text-anchor="middle">Perimeter</text>`;
+function buildDims(){
+  const u = S.unit === 'us' ? 'in' : 'mm';
+  const ex = S.unit === 'us'
+    ? {dia:'e.g. 4.5', side:'e.g. 6', w:'e.g. 10', h:'e.g. 4', l:'Overall length', p:'From CAD: total trim-line length'}
+    : {dia:'e.g. 115', side:'e.g. 150', w:'e.g. 250', h:'e.g. 100', l:'Overall length', p:'From CAD: total trim-line length'};
+  const field = (id, label, hint, val) => `
+    <div class="input-group">
+      <label for="${id}">${label}</label>
+      <div class="input-row"><input class="num-input" type="number" id="${id}" placeholder="0.00" step="any" min="0" value="${val}"><div class="num-unit">${u}</div></div>
+      <div class="input-hint">${hint}</div>
+    </div>`;
+  let html = '';
+  if(S.shape === 'round')  html = field('d1','Diameter',ex.dia,S.d1);
+  if(S.shape === 'square') html = field('d1','Side length',ex.side,S.d1);
+  if(S.shape === 'rect')   html = field('d1','Width',ex.w,S.d1) + field('d2','Height',ex.h,S.d2);
+  if(S.shape === 'slot')   html = field('d1','Overall length',ex.l,S.d1) + field('d2','Width',ex.h,S.d2);
+  if(S.shape === 'custom') html = `<div class="span2">${field('d1','Total trim-line length',ex.p,S.d1)}</div>`;
+  $('dimInputs').innerHTML = html;
+  document.querySelectorAll('.u-len').forEach(e => e.textContent = u);
+  const cat = currentMat() ? currentMat().cat : S.cat;
+  $('thickLbl').textContent = cat === 'diecast' || cat === 'forge' ? 'Flash / trim-line thickness' : 'Material thickness';
+  $('thickHint').textContent = (cat === 'diecast')
+    ? (S.unit === 'us' ? 'Flash and gate land at the trim line, typically 0.02–0.08 in' : 'Flash and gate land at the trim line, typically 0.5–2 mm')
+    : cat === 'forge'
+    ? (S.unit === 'us' ? 'Flash land thickness, typically 0.06–0.25 in' : 'Flash land thickness, typically 1.5–6 mm')
+    : (S.unit === 'us' ? 'e.g. 0.135 in ≈ 10 ga steel · 0.0598 in ≈ 16 ga' : 'e.g. 3.4 mm ≈ 10 ga steel · 1.5 mm ≈ 16 ga');
 }
 
 /* ═══════════════════════════════════════════════════
    CALCULATION
 ═══════════════════════════════════════════════════ */
-function getPerimeter(){
-  const d1 = parseFloat(document.getElementById('dim1')?.value)||0;
-  const d2 = parseFloat(document.getElementById('dim2')?.value)||0;
-  if(shape==='round')  return Math.PI * d1;
-  if(shape==='square') return 4 * d1;
-  if(shape==='rect')   return 2*(d1+d2);
-  if(shape==='custom') return d1;
-  return 0;
+function currentMat(){ return MATERIALS.find(m => m.id === S.mat) || null; }
+function shearMPa(){
+  const m = currentMat(); if(!m) return 0;
+  if(m.id !== 'custom') return m.mpa;
+  const v = parseFloat(S.cShear) || 0;
+  return S.cShearUnit === 'ksi' ? v * MPA_PER_KSI : v;
 }
-
-function updateCalc(){
-  const perim = getPerimeter();
-  const thick = parseFloat(document.getElementById('thicknessInput')?.value)||0;
-
-  // Update perimeter readout
-  const pr = document.getElementById('perimReadout');
-  if(pr) pr.textContent = perim>0 ? perim.toFixed(3) : '—';
-
-  // Update SVG dimensions if applicable
-  if(shape==='round'){
-    const d1 = parseFloat(document.getElementById('dim1')?.value)||0;
-    const r = Math.min(52, Math.max(20, d1 * (unit==='us'?10:0.4)));
-    updateSVG_round(r||46);
-  } else if(shape==='square'){
-    const d1 = parseFloat(document.getElementById('dim1')?.value)||0;
-    const s = Math.min(90, Math.max(30, d1*(unit==='us'?8:0.35)));
-    updateSVG_square(s||60);
-  } else if(shape==='rect'){
-    const d1 = parseFloat(document.getElementById('dim1')?.value)||0;
-    const d2 = parseFloat(document.getElementById('dim2')?.value)||0;
-    const ww=Math.min(160,Math.max(40,(d1||8)*(unit==='us'?10:0.4)));
-    const hh=Math.min(90,Math.max(25,(d2||5)*(unit==='us'?10:0.4)));
-    updateSVG_rect(ww,hh);
-  }
-
-  // Enable next button
-  const ok = perim>0 && thick>0;
-  const btn2 = document.getElementById('btnNext2');
-  if(btn2) btn2.disabled = !ok;
-
-  if(ok && selMat){
-    let rawTons;
-    if(unit==='us'){
-      rawTons = perim * thick * selMat.constUS;
-    } else {
-      // kN = perim(mm) * thick(mm) * shear(kN/mm²)
-      const kN = perim * thick * (selMat.shearMPa / 1000);
-      rawTons = kN / 8.896; // kN to short tons
-    }
-    calcResult.raw = rawTons;
-    calcResult.perimeter = perim;
-    calcResult.thickness = thick;
-    calcResult.safe = rawTons * (1 + safetyPct/100);
+function perimeter(){
+  const a = parseFloat(S.d1) || 0, b = parseFloat(S.d2) || 0;
+  switch(S.shape){
+    case 'round':  return Math.PI * a;
+    case 'square': return 4 * a;
+    case 'rect':   return 2 * (a + b);
+    case 'slot':   return a > b ? 2 * (a - b) + Math.PI * b : Math.PI * b;
+    default:       return a;
   }
 }
 
-function updateSafety(){
-  safetyPct = parseInt(document.getElementById('safetySlider').value);
-  document.getElementById('safetyPctVal').textContent = safetyPct+'%';
-  document.getElementById('safePctLabel').textContent = safetyPct;
-  calcResult.safe = calcResult.raw * (1 + safetyPct/100);
-  renderResults();
+function calc(){
+  const tau = shearMPa();
+  const perim = perimeter();
+  const extra = parseFloat(S.extra) || 0;
+  const cut = perim + extra;
+  const t = parseFloat(S.thick) || 0;
+  const cav = Math.max(1, parseInt(S.cav) || 1);
+  if(!(tau > 0 && cut > 0 && t > 0)) return null;
+  // convert to mm for the force computation
+  const toMM = S.unit === 'us' ? 25.4 : 1;
+  const kNcut = (cut * toMM) * (t * toMM) * tau / 1000 * cav;
+  const kNstrip = kNcut * S.strip / 100;
+  const kNbase = kNcut + kNstrip;
+  const kNreq = kNbase * (1 + S.safety / 100);
+  const perUnit = S.unit === 'us' ? KN_PER_SHORT_TON : KN_PER_TONNE;
+  return {tau, perim, extra, cut, t, cav, kNcut, kNstrip, kNbase, kNreq,
+          base: kNbase / perUnit, req: kNreq / perUnit, cutT: kNcut / perUnit};
 }
 
 /* ═══════════════════════════════════════════════════
-   STEP NAVIGATION
+   RENDER
 ═══════════════════════════════════════════════════ */
-function goStep(n){
-  [1,2,3].forEach(i=>{
-    document.getElementById('step'+i).style.display = i===n?'block':'none';
-    const si = document.getElementById('si'+i);
-    si.className = 'step-item' + (i<n?' done':(i===n?' active':''));
+function render(){
+  renderPreview();
+  const r = calc();
+  const us = S.unit === 'us';
+  const tUnit = us ? 'US tons' : 'tonnes';
+  $('gaugeUnit').textContent = us ? 'US TONS REQUIRED' : 'METRIC TONNES REQUIRED';
+
+  const arc = $('gaugeArc');
+  const len = arc.getTotalLength();
+  arc.style.strokeDasharray = len;
+
+  if(!r){
+    arc.style.strokeDashoffset = len;
+    $('gaugeVal').textContent = '—';
+    $('gMid').textContent = ''; $('gMax').textContent = '';
+    const missing = [!currentMat() && 'material', !(shearMPa() > 0) && currentMat() && 'shear strength', !(perimeter() + (parseFloat(S.extra)||0) > 0) && 'trim-line dimensions', !(parseFloat(S.thick) > 0) && 'thickness'].filter(Boolean);
+    $('gaugeAlt').innerHTML = `<div class="empty-msg">Enter ${missing.join(', ') || 'inputs'} to calculate.</div>`;
+    $('resultBody').style.display = 'none';
+    $('classes').innerHTML = `<div class="empty-msg" style="grid-column:1/-1">Press classes appear once tonnage is calculated.</div>`;
+    renderNotes(null);
+    lastSummary = '';
+    writeHash();
+    return;
+  }
+
+  $('resultBody').style.display = '';
+  // Gauge scale: next class above required, rounded
+  const best = CLASSES.find(c => r.base <= c * UTIL_TARGET && r.req <= c) || CLASSES[CLASSES.length-1];
+  const gMax = Math.max(best * 1.25, r.req * 1.1);
+  arc.style.strokeDashoffset = len * (1 - Math.min(1, r.req / gMax));
+  arc.setAttribute('stroke', r.req <= best * 0.6 ? '#4ade80' : r.req <= best * 0.85 ? '#F5C100' : '#fb923c');
+  $('gMid').textContent = fmt(gMax / 2, 0);
+  $('gMax').textContent = fmt(gMax, 0);
+  $('gaugeVal').textContent = r.req >= 100 ? fmt(r.req, 0) : fmt(r.req, 1);
+  $('gaugeAlt').innerHTML = `= <b>${fmt(r.kNreq, 0)} kN</b> · ${us ? fmt(r.kNreq / KN_PER_TONNE, 1) + ' tonnes' : fmt(r.kNreq / KN_PER_SHORT_TON, 1) + ' US tons'} · incl. ${S.safety}% safety margin`;
+
+  const L = us ? 'in' : 'mm';
+  $('kv').innerHTML = `
+    <div><span>Cut length</span><b>${fmt(r.cut, us ? 2 : 0)} ${L}</b></div>
+    <div><span>Shear strength</span><b>${fmt(r.tau, 0)} MPa</b></div>
+    <div><span>Pure cutting</span><b>${fmt(r.cutT, 1)} ${us ? 'US t' : 't'}</b></div>`;
+
+  $('formula').innerHTML = `
+    <code>F = L × t × τ × n × (1 + strip) × (1 + SF)</code><br>
+    = ${fmt(r.cut * (us ? 25.4 : 1), 1)} mm × ${fmt(r.t * (us ? 25.4 : 1), 2)} mm × ${fmt(r.tau, 0)} MPa × ${r.cav} = <b>${fmt(r.kNcut, 1)} kN</b> cutting<br>
+    + ${S.strip}% stripping = ${fmt(r.kNbase, 1)} kN → + ${S.safety}% margin = <code>${fmt(r.kNreq, 1)} kN = ${fmt(r.req, 1)} ${tUnit}</code>`;
+
+  renderClasses(r, best, tUnit);
+  renderNotes(r);
+
+  const m = currentMat();
+  lastSummary = [
+    `Trim press tonnage estimate`,
+    `Material: ${m.name} (${m.grade}), shear ${fmt(r.tau,0)} MPa`,
+    `Cut length: ${fmt(r.cut, us ? 2 : 0)} ${L} (shape: ${S.shape}${r.extra ? ', incl. ' + r.extra + ' ' + L + ' extra' : ''}) · Thickness: ${r.t} ${L} · Parts/stroke: ${r.cav}`,
+    `Cutting force: ${fmt(r.kNcut,1)} kN · +${S.strip}% stripping · +${S.safety}% safety`,
+    `Required: ${fmt(r.req,1)} ${tUnit} (${fmt(r.kNreq,0)} kN)`,
+    `Recommended press class: ${best} ${tUnit}`,
+    `Estimate only. Verify with press builder and die designer.`,
+    `Calculator by zov911 · ${location.href}`,
+  ].join('\n');
+  writeHash();
+}
+
+function renderClasses(r, best, tUnit){
+  const i = CLASSES.indexOf(best);
+  const picks = [CLASSES[i-1], best, CLASSES[i+1]].filter(Boolean);
+  $('classes').innerHTML = picks.map(c => {
+    const util = r.base / c * 100;
+    const under = r.req > c || util > UTIL_TARGET * 100;
+    const isBest = c === best;
+    const fill = util > 100 ? 'over' : util > UTIL_TARGET * 100 ? 'warn' : '';
+    return `<div class="cls ${isBest ? 'best' : under ? 'under' : ''}">
+      <span class="cls-badge ${isBest ? 'b-best' : under ? 'b-no' : 'b-ok'}">${isBest ? 'Best fit' : under ? 'Undersized' : 'Headroom'}</span>
+      <div class="cls-cap">${c}<small>${tUnit}</small></div>
+      <div class="cls-type">${classType(c)}</div>
+      <div class="cap-lbl"><span>Working load</span><span>${fmt(Math.min(util, 999), 0)}%</span></div>
+      <div class="cap-track"><div class="cap-fill ${fill}" style="width:${Math.min(100, util)}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderNotes(r){
+  const m = currentMat();
+  const notes = [];
+  if(m && m.cat === 'diecast'){
+    notes.push(['n-tip','Die-cast trimming','Trim force usually peaks at gate and overflow breakout. Thick gates can dominate the result, so measure the real gate land thickness, not just the flash. Shear-angled trim steels can cut peak force noticeably.']);
+    if(m.id === 'struct') notes.push(['n-info','Structural & mega-castings','Large structural HPDC parts (giga/mega-castings) often need multi-station or sequential trim dies and large-bed servo-hydraulic presses. Check bed size and stroke as well as tonnage.']);
+    if(m.id.startsWith('zamak') || m.id === 'za8') notes.push(['n-info','Zinc alloys','Zinc parts are often trimmed cold soon after ejection. Shear strength rises slightly as the casting ages, so leave margin for parts trimmed later.']);
+  }
+  if(m && m.cat === 'forge'){
+    if(m.id === 'fhot') notes.push(['n-warn','Hot-trim values are temperature sensitive','Flash shear strength drops sharply with temperature. A part that cools to ~800 °C can need roughly double the force. Size for the coldest realistic trim temperature.']);
+    else notes.push(['n-tip','Cold trimming forgings','Cold trimming takes several times the force of hot trimming but gives better dimensional control. Make sure the press frame and die are rated for the reverse (snap-through) shock.']);
+  }
+  if(m && (m.id === 'dp600' || m.id === 'dp980' || m.id === 'ss316h')){
+    notes.push(['n-warn','High-strength material: snap-through','Breakthrough shock on high-strength steels can exceed a mechanical press\'s reverse-load rating, which is often about 10% of capacity. Use hydraulic or servo presses, stepped or shear-angled punches, and premium PM tool steels or coatings.']);
+    notes.push(['n-tip','Clearance','AHSS typically needs larger die clearance than mild steel (often 10–15% of thickness per side) to reduce burrs, edge cracking and tool wear.']);
+  }
+  notes.push(['n-info','Hydraulic vs mechanical','Hydraulic and servo-hydraulic presses deliver full tonnage anywhere in the stroke. Mechanical presses are rated near bottom dead center, so check the tonnage curve if cutting happens higher in the stroke.']);
+  if(r && r.req > 0 && r.cav > 1) notes.push(['n-tip','Multi-cavity dies','With multiple cavities, keep the die\'s center of load near the press center line. Off-center loads tilt the slide and wear gibs and guides. Rule of thumb: derate capacity when the load center is offset.']);
+  if(r && r.t * (S.unit === 'us' ? 25.4 : 1) > 12) notes.push(['n-warn','Thick section','Above ~12 mm (0.5 in) the simple shear model gets less accurate. Consult your press builder for fine-blanking or heavy-section shear data.']);
+  $('notes').innerHTML = notes.map(([c,t,x]) => `<div class="note ${c}"><strong>${t}</strong>${x}</div>`).join('');
+}
+
+/* ── SVG preview ── */
+function renderPreview(){
+  const a = parseFloat(S.d1) || 0, b = parseFloat(S.d2) || 0;
+  const Y = '#F5C100';
+  let svg = '';
+  if(S.shape === 'round'){
+    svg = `<circle cx="110" cy="48" r="40" fill="rgba(245,193,0,0.08)" stroke="${Y}" stroke-width="2" stroke-dasharray="6 3"/><line x1="70" y1="48" x2="150" y2="48" stroke="#666" stroke-dasharray="3 2"/><text x="110" y="44" fill="${Y}" font-size="11" font-family="Oswald" text-anchor="middle">Ø</text>`;
+  } else if(S.shape === 'square'){
+    svg = `<rect x="70" y="8" width="80" height="80" fill="rgba(245,193,0,0.08)" stroke="${Y}" stroke-width="2" stroke-dasharray="6 3"/><text x="110" y="52" fill="${Y}" font-size="11" font-family="Oswald" text-anchor="middle">4 × side</text>`;
+  } else if(S.shape === 'rect' || S.shape === 'slot'){
+    const ratio = a > 0 && b > 0 ? Math.min(4, Math.max(1.2, a / b)) : 2.2;
+    const w = Math.min(200, 70 * ratio), h = Math.min(80, w / ratio);
+    const x = (220 - w) / 2, y = (96 - h) / 2;
+    const rx = S.shape === 'slot' ? h / 2 : 2;
+    svg = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="rgba(245,193,0,0.08)" stroke="${Y}" stroke-width="2" stroke-dasharray="6 3"/><text x="110" y="52" fill="${Y}" font-size="11" font-family="Oswald" text-anchor="middle">${S.shape === 'slot' ? '2(L−W) + πW' : '2 × (W + H)'}</text>`;
+  } else {
+    svg = `<path d="M40 70 L70 20 L120 35 L170 15 L185 70 L130 82 Z" fill="rgba(245,193,0,0.08)" stroke="${Y}" stroke-width="2" stroke-dasharray="6 3" stroke-linejoin="round"/><text x="110" y="58" fill="${Y}" font-size="11" font-family="Oswald" text-anchor="middle">CAD perimeter</text>`;
+  }
+  const p = perimeter() + (parseFloat(S.extra) || 0);
+  const L = S.unit === 'us' ? 'in' : 'mm';
+  $('preview').innerHTML = `<svg viewBox="0 0 220 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${svg}</svg>
+    <div class="perim-read"><div class="k">Total cut length</div><div class="v">${p > 0 ? fmt(p, S.unit === 'us' ? 2 : 0) + ' ' + L : '—'}</div></div>`;
+}
+
+/* ═══════════════════════════════════════════════════
+   EVENTS
+═══════════════════════════════════════════════════ */
+function convertLength(v, toUnit){
+  const n = parseFloat(v); if(!(n > 0)) return v;
+  return toUnit === 'mm' ? +(n * 25.4).toFixed(2) : +(n / 25.4).toFixed(4);
+}
+
+function bind(){
+  document.querySelector('.unit-toggle').addEventListener('click', e => {
+    const b = e.target.closest('[data-unit]'); if(!b || b.dataset.unit === S.unit) return;
+    const to = b.dataset.unit;
+    ['d1','d2','thick','extra'].forEach(k => S[k] = convertLength(S[k], to));
+    S.unit = to;
+    document.querySelectorAll('[data-unit]').forEach(x => x.setAttribute('aria-pressed', x.dataset.unit === S.unit));
+    buildDims(); syncFields(); render();
   });
-  currentStep = n;
-  if(n===3){ updateCalc(); renderResults(); }
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-/* ═══════════════════════════════════════════════════
-   RENDER RESULTS
-═══════════════════════════════════════════════════ */
-function renderResults(){
-  const safe = calcResult.safe;
-  const raw  = calcResult.raw;
-
-  // Gauge
-  const maxTons = 90;
-  const pct = Math.min(1, safe / maxTons);
-  const arcLen = 345;
-  const offset = arcLen - (arcLen * pct);
-  document.getElementById('gaugeArc').style.strokeDashoffset = offset;
-  // Color the arc
-  const arc = document.getElementById('gaugeArc');
-  if(safe <= 35) arc.setAttribute('stroke','#4ade80');
-  else if(safe <= 50) arc.setAttribute('stroke','#F5C100');
-  else if(safe <= 75) arc.setAttribute('stroke','#fb923c');
-  else arc.setAttribute('stroke','#f87171');
-
-  document.getElementById('gaugeVal').textContent = safe.toFixed(1);
-
-  // Formula card
-  const u = unit==='us';
-  const fc = document.getElementById('formulaCard');
-  fc.innerHTML = `
-    <div style="margin-bottom:8px;">
-      <code>Tonnage = Perimeter × Thickness × Material Constant</code>
-    </div>
-    <div class="eq-line">
-      = ${calcResult.perimeter.toFixed(3)} ${u?'in':'mm'}
-      × ${calcResult.thickness.toFixed(3)} ${u?'in':'mm'}
-      × ${u ? selMat.constUS : (selMat.shearMPa+' MPa / 1000')}
-      ${u?'':'→ ÷ 8.896 (kN→tons)'}
-    </div>
-    <div class="eq-line" style="margin-top:4px;">
-      Raw result: <code>${raw.toFixed(2)} tons</code>
-      &nbsp;+&nbsp;${safetyPct}% safety factor
-      = <code style="font-size:16px;">${safe.toFixed(1)} tons required</code>
-    </div>
-  `;
-
-  // Model cards
-  const grid = document.getElementById('modelsGrid');
-  grid.innerHTML = '';
-  MODELS.forEach((m,i) => {
-    const fits = safe <= m.tons;
-    const prevFits = i>0 ? safe <= MODELS[i-1].tons : false;
-    const isBest = fits && !prevFits;
-    const isOk = fits && !isBest;
-    const isTooSmall = !fits;
-    const spec = u ? m.specUS : m.specMM;
-
-    const capPct = Math.min(100, (safe / m.tons)*100);
-    const fillClass = isTooSmall ? 'overload' : (capPct > 80 ? 'ok' : '');
-
-    let badgeHtml='', statusHtml='', cardClass='model-card';
-    if(isBest){
-      cardClass+=' match';
-      badgeHtml='<div class="model-badge badge-best">Best Fit</div>';
-      statusHtml=`<div class="model-status"><div class="status-dot" style="background:var(--green)"></div><span style="color:var(--green)">Recommended for this job</span></div>`;
-    } else if(isOk){
-      cardClass+=' match';
-      badgeHtml='<div class="model-badge badge-ok">Capable</div>';
-      statusHtml=`<div class="model-status"><div class="status-dot" style="background:var(--yellow)"></div><span style="color:var(--yellow)">Within capacity</span></div>`;
-    } else {
-      cardClass+=' too-small';
-      badgeHtml='<div class="model-badge badge-no">Insufficient</div>';
-      statusHtml=`<div class="model-status"><div class="status-dot" style="background:var(--red)"></div><span style="color:var(--red)">Exceeds rated tonnage</span></div>`;
-    }
-
-    const machineSVG = buildMachineSVG(m, isBest, isTooSmall);
-
-    const card = document.createElement('div');
-    card.className = cardClass + ' anim-in anim-in-d'+i;
-    card.innerHTML = `
-      ${badgeHtml}
-      <div class="machine-illus">${machineSVG}</div>
-      <div class="model-name">${m.name}</div>
-      <div class="spec-list">
-        <div class="spec-row"><span class="spec-key">Rated Tonnage</span><span class="spec-val">${m.tons} tons</span></div>
-        <div class="spec-row"><span class="spec-key">Tie Bar Space</span><span class="spec-val">${spec.tieD} × ${spec.tieW}</span></div>
-        <div class="spec-row"><span class="spec-key">Stroke</span><span class="spec-val">${spec.stroke}</span></div>
-        <div class="spec-row"><span class="spec-key">Daylight</span><span class="spec-val">${spec.daylightMin} – ${spec.daylightMax}</span></div>
-      </div>
-      <div class="cap-bar-wrap">
-        <div class="cap-bar-label">
-          <span>Load: ${safe.toFixed(1)}T / ${m.tons}T</span>
-          <span>${Math.min(100,capPct).toFixed(0)}% of capacity</span>
-        </div>
-        <div class="cap-bar-track">
-          <div class="cap-bar-fill ${fillClass}" style="width:${Math.min(100,capPct)}%"></div>
-        </div>
-      </div>
-      ${statusHtml}
-    `;
-    grid.appendChild(card);
+  $('catTabs').addEventListener('click', e => {
+    const b = e.target.closest('[data-cat]'); if(!b) return;
+    S.cat = b.dataset.cat;
+    if(S.cat === 'custom') S.mat = 'custom';
+    buildCats(); buildMaterials(); buildDims(); render();
+  });
+  $('matGrid').addEventListener('click', e => {
+    const b = e.target.closest('[data-mat]'); if(!b) return;
+    S.mat = b.dataset.mat;
+    buildMaterials(); buildDims(); render();
+  });
+  $('shapeRow').addEventListener('click', e => {
+    const b = e.target.closest('[data-shape]'); if(!b) return;
+    S.shape = b.dataset.shape; S.d1 = ''; S.d2 = '';
+    document.querySelectorAll('[data-shape]').forEach(x => x.setAttribute('aria-pressed', x === b));
+    buildDims(); render();
+  });
+  document.addEventListener('input', e => {
+    const id = e.target.id;
+    if(['d1','d2','thick','extra','cav'].includes(id)) S[id] = e.target.value;
+    else if(id === 'customShear') S.cShear = e.target.value;
+    else if(id === 'customShearUnit') S.cShearUnit = e.target.value;
+    else if(id === 'strip'){ S.strip = +e.target.value; $('stripVal').textContent = S.strip + '%'; }
+    else if(id === 'safety'){ S.safety = +e.target.value; $('safetyVal').textContent = S.safety + '%'; }
+    else return;
+    render();
+  });
+  $('btnCopy').addEventListener('click', async e => {
+    const btn = e.currentTarget;
+    if(!lastSummary){ btn.textContent = 'Enter inputs first'; setTimeout(() => btn.textContent = '📋 Copy summary', 1500); return; }
+    try { await navigator.clipboard.writeText(lastSummary); btn.textContent = '✓ Copied'; } catch(err){ btn.textContent = 'Copy failed'; }
+    setTimeout(() => btn.textContent = '📋 Copy summary', 1800);
+  });
+  $('btnShare').addEventListener('click', async e => {
+    const btn = e.currentTarget;
+    try { await navigator.clipboard.writeText(location.href); btn.textContent = '✓ Link copied'; } catch(err){ btn.textContent = 'Copy from address bar'; }
+    setTimeout(() => btn.textContent = '🔗 Share link', 1800);
+  });
+  $('btnPrint').addEventListener('click', () => window.print());
+  $('btnReset').addEventListener('click', () => {
+    S = {...DEFAULTS, unit:S.unit};
+    document.querySelectorAll('[data-shape]').forEach(x => x.setAttribute('aria-pressed', x.dataset.shape === 'round'));
+    buildCats(); buildMaterials(); buildDims(); syncFields(); render();
   });
 }
 
-/* ── Machine SVG Illustration ── */
-function buildMachineSVG(model, isBest, isTooSmall){
-  const h = model.height;
-  const w = 70;
-  const col = isBest ? '#F5C100' : (isTooSmall ? '#555' : '#888');
-  const bodyCol = isBest ? '#2a2200' : '#1a1a1a';
-  return `<svg width="${w}" height="${h+20}" viewBox="0 0 ${w} ${h+20}" xmlns="http://www.w3.org/2000/svg">
-    <!-- Frame top beam -->
-    <rect x="4" y="2" width="${w-8}" height="${h*0.1}" rx="2" fill="${col}" opacity="0.9"/>
-    <!-- Left column -->
-    <rect x="4" y="${h*0.1+2}" width="${w*0.15}" height="${h*0.55}" rx="1" fill="${col}" opacity="0.6"/>
-    <!-- Right column -->
-    <rect x="${w-4-w*0.15}" y="${h*0.1+2}" width="${w*0.15}" height="${h*0.55}" rx="1" fill="${col}" opacity="0.6"/>
-    <!-- Ram -->
-    <rect x="${w*0.2}" y="${h*0.1+2}" width="${w*0.6}" height="${h*0.22}" rx="2" fill="${col}" opacity="0.8"/>
-    <!-- Ram tip -->
-    <rect x="${w*0.28}" y="${h*0.32+2}" width="${w*0.44}" height="${h*0.06}" rx="1" fill="${col}"/>
-    <!-- Bed / Bolster -->
-    <rect x="4" y="${h*0.65+2}" width="${w-8}" height="${h*0.15}" rx="2" fill="${col}" opacity="0.7"/>
-    <!-- Die area indicator -->
-    <rect x="${w*0.18}" y="${h*0.38+2}" width="${w*0.64}" height="${h*0.27}" rx="1" fill="${bodyCol}" stroke="${col}" stroke-width="1" stroke-dasharray="${isBest?'0':'4 2'}" opacity="0.9"/>
-    <!-- Base -->
-    <rect x="0" y="${h*0.8+2}" width="${w}" height="${h*0.2+14}" rx="3" fill="${col}" opacity="0.5"/>
-    <!-- HMI screen -->
-    <rect x="${w*0.62}" y="${h*0.55}" width="${w*0.22}" height="${h*0.12}" rx="1.5" fill="${isBest?'#F5C100':'#2a2a2a'}" opacity="${isBest?'0.9':'0.5'}"/>
-  </svg>`;
+function syncFields(){
+  $('thick').value = S.thick; $('extra').value = S.extra; $('cav').value = S.cav;
+  $('strip').value = S.strip; $('stripVal').textContent = S.strip + '%';
+  $('safety').value = S.safety; $('safetyVal').textContent = S.safety + '%';
+  $('customShear').value = S.cShear; $('customShearUnit').value = S.cShearUnit;
 }
 
-/* ═══════════════════════════════════════════════════
-   INITIAL RENDER
-═══════════════════════════════════════════════════ */
-renderDimInputs();
+/* ── shareable state ── */
+const HASH_KEYS = ['unit','cat','mat','shape','d1','d2','thick','extra','cav','strip','safety','cShear','cShearUnit'];
+function writeHash(){
+  const p = new URLSearchParams();
+  HASH_KEYS.forEach(k => { if(S[k] !== '' && S[k] !== null && S[k] !== DEFAULTS[k]) p.set(k, S[k]); });
+  const h = p.toString();
+  try { history.replaceState(null, '', h ? '#' + h : location.pathname + location.search); } catch(e) {}
+}
+function readHash(){
+  const p = new URLSearchParams(location.hash.slice(1));
+  HASH_KEYS.forEach(k => { if(p.has(k)) S[k] = ['cav','strip','safety'].includes(k) ? +p.get(k) : p.get(k); });
+  if(!['us','mm'].includes(S.unit)) S.unit = 'us';
+  if(!CATS.some(c => c.id === S.cat)) S.cat = 'diecast';
+  if(S.mat && !MATERIALS.some(m => m.id === S.mat)) S.mat = null;
+  if(!['round','square','rect','slot','custom'].includes(S.shape)) S.shape = 'round';
+}
+
+/* ── init ── */
+$('yr').textContent = new Date().getFullYear();
+readHash();
+document.querySelectorAll('[data-unit]').forEach(x => x.setAttribute('aria-pressed', x.dataset.unit === S.unit));
+document.querySelectorAll('[data-shape]').forEach(x => x.setAttribute('aria-pressed', x.dataset.shape === S.shape));
+buildCats(); buildMaterials(); buildDims(); syncFields(); bind(); render();
 </script>
 </body>
 </html>
