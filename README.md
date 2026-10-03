@@ -38,4 +38,4 @@ I build custom engineering calculators and product configurators for press build
 
 **Reach out → [zov911.com](https://zov911.com)**
 
-© 2026 zov911. All rights reserved.
+© zov911. All rights reserved.
